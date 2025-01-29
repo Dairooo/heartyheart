@@ -67,31 +67,41 @@ let init = function () {
     if (showMessage) drawMessage();
   });
 
-  // Animation loop
+  // Heart animation logic
+  let heartPosition = function (rad) {
+    return [Math.pow(Math.sin(rad), 3), -(15 * Math.cos(rad) - 5 * Math.cos(2 * rad) - 2 * Math.cos(3 * rad) - Math.cos(4 * rad))];
+  };
+  
+  let scaleAndTranslate = function (pos, sx, sy, dx, dy) {
+    return [dx + pos[0] * sx, dy + pos[1] * sy];
+  };
+
+  let points = [];
+  let dr = 0.1;
+  for (let i = 0; i < Math.PI * 2; i += dr) {
+    points.push(scaleAndTranslate(heartPosition(i), 210, 13, width / 2, height / 2));
+  }
+
   let time = 0;
   let loop = function () {
-    if (showMessage) return; // Stop animation while the message is displayed
+    if (showMessage) {
+      drawMessage(); // Keep drawing the message while it's showing
+      return;
+    }
 
     let n = -Math.cos(time);
     let scale = (1 + n) * 0.5;
     ctx.fillStyle = "rgba(0,0,0,.1)";
     ctx.fillRect(0, 0, width, height);
 
-    let heartPosition = function (rad) {
-      return [Math.pow(Math.sin(rad), 3), -(15 * Math.cos(rad) - 5 * Math.cos(2 * rad) - 2 * Math.cos(3 * rad) - Math.cos(4 * rad))];
-    };
-    let scaleAndTranslate = function (pos, sx, sy, dx, dy) {
-      return [dx + pos[0] * sx, dy + pos[1] * sy];
-    };
-
-    let points = [];
-    let dr = 0.1;
+    // Animate the heart shape with scaling
+    let scaledPoints = [];
     for (let i = 0; i < Math.PI * 2; i += dr) {
-      points.push(scaleAndTranslate(heartPosition(i), 210 * scale, 13 * scale, width / 2, height / 2));
+      scaledPoints.push(scaleAndTranslate(heartPosition(i), 210 * scale, 13 * scale, width / 2, height / 2));
     }
 
     ctx.fillStyle = "rgba(255, 0, 0, 0.8)";
-    points.forEach(([x, y]) => {
+    scaledPoints.forEach(([x, y]) => {
       ctx.fillRect(x, y, 2, 2);
     });
 
@@ -99,16 +109,16 @@ let init = function () {
     window.requestAnimationFrame(loop, canvas);
   };
 
-  drawMessage(); // Display the message initially
+  // Display the message initially
+  drawMessage();
 
-  // Hide the message after the duration
+  // Hide the message after the specified duration
   setTimeout(() => {
     showMessage = false;
-    loop(); // Start the animation loop
+    loop(); // Start the heart animation loop
   }, showMessageDuration);
 };
 
 let s = document.readyState;
 if (s === 'complete' || s === 'loaded' || s === 'interactive') init();
 else document.addEventListener('DOMContentLoaded', init, false);
-    
